@@ -1,0 +1,18 @@
+A server is a computer or program that provides services to other computers and programs, called clients, over a network. Servers are part of client-server architecture in which a client requests something and the server responds to the request. A well-known example of a server is a web server, where the client (web browser) requests a page and the server provides the page to the browser
+
+A client is a machine or program that depends on a server for some resource or service. The client will send a request to the server for the resource or service. Different physical locations make no difference to the client and server since they are connected through a mutual network such as the Internet.
+
+The browser first communicates with the internet service provider (ISP).
+This further communicates with the domain name server to get the IP address of the server.
+The domain name server converts a domain name to an IP address.
+Using this IP address, the browser connects to the server.
+Once connected to the web server, our browser sends the request to the server and asks for particular files.
+When the browser has connected to the server at the correct IP address, the servers send all the requested HTML text for the web page to our browser.
+
+Differerent types of servers:
+A file server is used to store data files for multiple users. They provide users access to stored files and data and can allow faster retrieval and saving of data. These are used on private networks and provide a location for storage of computer files. It provides a central location to store files where multiple users can work with the same documents.
+A database server allows another computer to access the database and retrieve or upload data. This type of server typically has a large storage capacity.
+A web server delivers web pages requested by multiple client web browsers.
+Mail servers store and deliver email for clients through an email service platform. They are a form of digital ‘post office’ that sorts and stores emails.
+An application server provides a software environment with all the needed requirements. This server allows users to access the application without needing to download additional software.
+The proxy server communicates with the websites you are visiting on your behalf. It links the user with the rest of the internet. The browser connects to the proxy server, and the proxy server sends your request to the website and sends the website’s response back to you.

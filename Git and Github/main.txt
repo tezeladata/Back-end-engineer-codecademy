@@ -1,0 +1,40 @@
+Git is a software that allows you to keep track of changes made to a project over time. Git works by recording the changes you make to a project, storing those changes, then allowing you to reference them as needed.
+
+The word init means initialize. The command sets up all the tools Git needs to begin tracking changes made to the project.
+
+A Git project can be thought of as having three parts:
+A Working Directory: where you’ll be doing all the work: creating, editing, deleting and organizing files
+A Staging Area: where you’ll list changes you make to the working directory
+A Repository: where Git permanently stores those changes as different versions of the project
+
+The git status command shows the state of the working directory, staging area, and which files are untracked or tracked.
+
+We can add a file to the staging area with: git add filename
+
+Imagine that we type another line in already added file. Since the file is tracked, we can check the differences between the working directory and the staging area with: git diff filename
+
+A commit is the last step in our Git workflow. A commit permanently stores changes from the staging area inside the repository.
+
+Often with Git, you’ll need to refer back to an earlier version of a project. Commits are stored chronologically in the repository and can be viewed with: git log
+
+In Git, the commit you are currently on is known as the HEAD commit. In many cases, the most recently made commit is the HEAD commit.
+To see the HEAD commit, enter: git show HEAD
+
+The command git checkout HEAD filename will restore the file in your working directory to look exactly as it did when you last made a commit.
+
+We can unstage that file from the staging area using git reset HEAD filename
+
+Just like retracing your steps on that hike, Git enables you to rewind to the part before you made the wrong turn. You can do this with: git reset commit_SHA
+This command works by using the first 7 characters of the SHA of a previous commit. For example, if the SHA of the previous commit is 5d692065cf51a2f50ea8e7b19b5a7ae512f633ba, use: git reset 5d69206
+
+git checkout HEAD filename: Discards changes in the working directory.
+git reset HEAD filename: Unstages file changes in the staging area.
+git reset commit_SHA: Resets to a previous commit in your commit history.
+
+Let’s say you finish working on a lengthy feature and everything seems to be working fine so you commit your work. Shortly after, you realize you missed a few semicolons in one of your functions. You could technically create a new commit, but ideally, you want to keep all commits specific, clean, and succinct. To avoid creating a new one, you could create your changes, stage them with git add and then type the command git commit --amend to update your previous commit.
+
+if you want to keep the same commit message, you can simply add the flag --no-edit: $ git commit --amend --no-edit
+
+One of the best ways to share what you’ve been learning with other people is to put your code on GitHub. GitHub is both a website and a service that facilitates software development by allowing you to store your code in containers, called repositories, and by tracking changes made to your code. In addition, it offers a hosting service and tools to build, test, and deploy code.
+
+Although both GitHub and Git have similar names, GitHub is a service, while Git is a development tool that can be used by you outside of and without GitHub.
