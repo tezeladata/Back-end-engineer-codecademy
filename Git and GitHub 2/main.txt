@@ -1,0 +1,32 @@
+Git allows us to create branches to experiment with versions of a project. Imagine you want to create a version of a story with a happy ending. You can create a new branch and make the happy ending changes to that branch only. It will have no effect on the master branch until you’re ready to merge the happy ending to the master branch.
+
+git branch - to check current branch
+
+git checkout branch_name - move to selected branch
+
+What if you wanted to include all the changes made to the other branch on the master branch? We can easily accomplish this by merging the branch into master with:
+git merge branch_name
+
+What would happen if you made a commit on master before you merged the two branches? Furthermore, what if the commit you made on master altered the same exact text you worked on in fencing? When you switch back to master and ask Git to merge the two branches, Git doesn’t know which changes you want to keep. This is called a merge conflict.
+
+In Git, branches are usually a means to an end. You create them to work on a new project feature, but the end goal is to merge that feature into the master branch. After the branch has been integrated into master, it has served its purpose and can be deleted.
+git branch -d branch_name - delete branch
+
+Nice work! We have a clone of branch's remote on our computer. One thing that Git does behind the scenes when you clone science-quizzes is give the remote address the name origin, so that you can refer to it more conveniently. 
+
+An easy way to see if changes have been made to the remote (original branch which you cloned) and bring the changes down to your local copy is with:
+git fetch
+
+Even though original branch's new commits have been fetched to your local copy of the Git project, those commits are on the origin/master branch. Your local master branch has not been updated yet, so you can’t view or make changes to any of the work person has added.
+
+Now that you’ve merged origin/master into your local master branch, you’re ready to contribute some work of your own. The workflow for Git collaborations typically follows this order:
+1. Fetch and merge changes from the remote
+2. Create a branch to work on a new project feature
+3. Develop the feature on your branch and commit your work
+4. Fetch and merge from the remote again (in case new commits were made while you were working) Push your branch up to the remote for review
+
+The command: git push origin <your_branch_name> will push your branch up to the remote, origin.
+
+A pull request is a feature of GitHub and other source code management tools to review code before merging it from one branch to another, usually the main branch.
+
+What happens when our Git repository contains certain files we never want to commit to a shared or public codebase? We want to be careful that git add doesn’t accidentally move them to the staging area. That’s where a .gitignore file comes in. .gitignore is a plain text file that tells Git to intentionally ignore changes in certain files. This also ensures that no other contributor in the repository accidentally commits those files.

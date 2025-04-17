@@ -1,0 +1,45 @@
+A table is a collection of data organized into rows and columns. Tables are sometimes referred to as relations.
+
+All data stored in a relational database is of a certain data type. Some of the most common data types are:
+INTEGER, a positive or negative whole number
+TEXT, a text string
+DATE, the date formatted as YYYY-MM-DD
+REAL, a decimal value
+
+A statement is text that the database recognizes as a valid command. Statements always end in a semicolon ;.
+
+CREATE TABLE table_name (
+   column_1 data_type, 
+   column_2 data_type, 
+   column_3 data_type
+);
+
+CREATE statements allow us to create a new table in the database. You can use the CREATE statement anytime you want to create a new table from scratch. 
+
+The INSERT statement inserts a new row into a table.
+We can use the INSERT statement when you want to add new records:
+INSERT INTO celebs (id, name, age) 
+VALUES (1, 'Justin Bieber', 29);
+
+SELECT statements are used to fetch data from a database.
+
+The ALTER TABLE statement adds a new column to a table. You can use this command when you want to add columns to a table. The statement below adds a new column twitter_handle to the celebs table:
+ALTER TABLE celebs 
+ADD COLUMN twitter_handle TEXT;
+
+The UPDATE statement edits a row in a table. You can use the UPDATE statement when you want to change existing records. The statement below updates the record with an id value of 4 to have the twitter_handle @taylorswift13:
+UPDATE celebs 
+SET twitter_handle = '@taylorswift13' 
+WHERE id = 4; 
+
+The DELETE FROM statement deletes one or more rows from a table. You can use the statement when you want to delete existing records. The statement below deletes all records in the celebs table with no twitter_handle:
+DELETE FROM celebs 
+WHERE twitter_handle IS NULL;
+
+Preview content is loadingConstraints that add information about how a column can be used are invoked after specifying the data type for a column. They can be used to tell the database to reject inserted data that does not adhere to a certain restriction. The statement below sets constraints on the celebs table.
+CREATE TABLE celebs (
+   id INTEGER PRIMARY KEY, 
+   name TEXT UNIQUE,
+   date_of_birth TEXT NOT NULL,
+   date_of_death TEXT DEFAULT 'Not Applicable'
+);
