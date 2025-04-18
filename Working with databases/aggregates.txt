@@ -1,0 +1,45 @@
+SQL Queries don’t just access raw data, they can also perform calculations on the raw data to answer specific data questions.
+
+Calculations performed on multiple rows of a table are called aggregates.
+
+COUNT(): count the number of rows
+SUM(): the sum of the values in a column
+MAX()/MIN(): the largest/smallest value
+AVG(): the average of the values in a column
+ROUND(): round the values in the column
+
+The fastest way to calculate how many rows are in a table is to use the COUNT() function.
+SELECT COUNT(*) FROM table_name;
+SELECT COUNT(*) FROM public.countries;
+SELECT count(*) FROM fake_apps WHERE price = 0.0;
+
+SQL makes it easy to add all values in a particular column using SUM().
+SUM() is a function that takes the name of a column as an 
+argument and returns the sum of all the values in that column.
+SELECT SUM(population) FROM public.countries;
+SELECT SUM(area) FROM public.countries WHERE country LIKE 'A%';
+SELECT SUM(downloads) FROM fake_apps;
+
+The MAX() and MIN() functions return the highest and lowest values in a column, respectively.
+SELECT MAX(area) FROM public.countries;
+SELECT MIN(gdp) FROM public.countries;
+SELECT MAX(price) FROM fake_apps;
+
+SQL uses the AVG() function to quickly calculate the average value of a particular column.
+SELECT AVG(population) FROM public.countries;
+SELECT AVG(area) FROM public.countries;
+select avg(price) from fake_apps;
+
+By default, SQL tries to be as precise as possible without rounding. We can make the result table easier to read using the ROUND() function.
+ROUND() function takes two arguments inside the parenthesis: a column name, an integer.
+SELECT name, ROUND(price, 0) FROM fake_apps.
+SELECT country, ROUND(area, 1) FROM public.countries;
+
+GROUP BY is a clause in SQL that is used with aggregate functions. It is used in collaboration with the SELECT statement to arrange identical data into groups.
+SELECT price, COUNT(*) FROM fake_apps GROUP BY price;
+select price, COUNT(downloads) from fake_apps WHERE downloads > 20000;
+SELECT ROUND(imdb_rating), COUNT(name) FROM movies GROUP BY ROUND(imdb_rating);
+
+HAVING is very similar to WHERE. In fact, all types of WHERE clauses you learned about thus far can be used with HAVING.
+When we want to limit the results of a query based on values of the individual rows, use WHERE.
+When we want to limit the results of a query based on an aggregate property, use HAVING.
