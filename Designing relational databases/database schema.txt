@@ -1,0 +1,50 @@
+Like an architectural blueprint, a database schema is documentation that helps its audience such as a database designer, administrator and other users interact with a database. It gives an overview of the purpose of the database along with the data that makes up the database, how the data is organized into tables, how the tables are internally structured and how they relate to one another.
+
+When designing a database schema consider the following steps:
+Define the purpose of your database
+Find the information that make up the database
+Organize your information into tables
+Structure your tables into columns of information
+Avoid redundant data that leads to inaccuracy and waste in space
+Identify the relationships between your tables and implement them
+
+Creating three tables to spread and store data in better way:
+CREATE TABLE book (
+  title varchar(100),
+  isbn varchar(50),
+  pages integer,
+  price money,
+  description varchar(256),
+  publisher varchar(100)
+);
+CREATE TABLE chapter (
+  id integer,
+  number integer,
+  title varchar(50),
+  content varchar(1024)
+);
+CREATE TABLE author (
+  name varchar(50),
+  bio varchar(100),
+  email varchar(20)
+);
+
+To insert data into a PostgreSQL table, use this syntax:
+INSERT INTO table_name VALUES (
+  column_one_value,
+  column_two_value,
+  …
+  column_N_value
+);
+
+In order to have a useful schema, we need to prevent a database table from storing inaccurate data and returning multiple rows when we expect only one. We do this by constraining the table with the help of a primary key assigned to one or more columns. This will ensure that the column or combination of columns contains only unique values.
+
+Inserting example:
+INSERT INTO book VALUES (
+  'Postgres for Beginners',
+  '0-5980-6249-1',
+  25,
+  4.99,
+  'Learn Postgres the Easy Way',
+  'Codecademy Publishing'
+);
