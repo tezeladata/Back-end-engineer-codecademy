@@ -1,0 +1,36 @@
+What are relationships? A database relationship establishes the way in which connected tables are dependent on one another.
+
+What are the different types of database relationships? There are three types: one-to-one, one-to-many and many-to-many. We will delve into each one in the upcoming exercises. Let’s get started.
+
+In a one-to-one relationship, a row of table A is associated with exactly one row of table B and vice-versa. For example, a person may only have one passport assigned to them. Conversely, a passport may only be issued to one person. A car may only have one vehicle identification number assigned to it and vice-versa. A driver may only have one driver’s license issued to them in their home state.
+
+In a one-to-one relationship, a row of table A is associated with exactly one row of table B and vice-versa. For example, a person may only have one passport assigned to them. Conversely, a passport may only be issued to one person. A car may only have one vehicle identification number assigned to it and vice-versa. A driver may only have one driver’s license issued to them in their home state.
+license_id char(20) REFERENCES driver(license_id) UNIQUE
+CREATE TABLE book_details (
+  id integer  PRIMARY KEY,
+  book_isbn varchar(50) REFERENCES book(isbn) UNIQUE,
+  rating decimal,
+  language varchar(10),
+  keywords text[],
+  date_published date
+);
+
+As opposed to one-to-one, a one-to-many relationship cannot be represented in a single table. Why? Because there will be multiple rows that need to exist for a primary key and this will result in redundant data that breaks the constraint placed upon a primary key.
+
+Consider the following examples of many to many relationships:
+A student can take many courses while a course can have enrollments from many students.
+A recipe can have many ingredients while an ingredient can belong to many different recipes.
+A customer can patronize many banks while a bank can service many different customers.
+In each of the above examples, we see that a many-to-many relationship can be broken into two one-to-many relationships.
+
+To implement a many-to-many relationship in a relational database, we would create a third cross-reference table also known as a join table. It will have these two constraints:
+foreign keys referencing the primary keys of the two member tables.
+a composite primary key made up of the two foreign keys.
+
+CREATE TABLE books_authors (
+  book_isbn varchar(50) REFERENCES book(isbn),
+  author_email varchar(20) REFERENCES author(email),
+  PRIMARY KEY (book_isbn, author_email)
+);
+
+SELECT constraint_name, table_name, column_name FROM information_schema.key_column_usage WHERE table_name = 'books_authors';
