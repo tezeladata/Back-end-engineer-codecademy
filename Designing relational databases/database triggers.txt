@@ -1,0 +1,82 @@
+a database trigger is procedural code that is automatically executed in response to certain events on a particular table or view in a accessed through a database management system, or DBMS. The trigger is mostly used for maintaining the integrity of the information on the database.
+
+In short, adding a trigger saves people from forgetting to do that action, and ensures consistent rules are applied.
+
+For now we will keep things simple and go with a trigger that calls a function when a table is updated.
+CREATE TRIGGER <trigger_name>
+BEFORE UPDATE ON <table_name>
+FOR EACH ROW
+EXECUTE PROCEDURE<function>;
+
+You are not limited to setting a trigger only on an UPDATE, it can be set for UPDATE, INSERT, DELETE and TRUNCATE.
+
+CREATE TRIGGER insert_trigger
+BEFORE INSERT ON customers
+FOR EACH ROW
+EXECUTE PROCEDURE insert_function();
+
+Let’s take a look at when a trigger can be activated in relation to the query that activates it. There are two common options: BEFORE and AFTER.
+We have already used BEFORE — this calls your trigger before the query that fired the trigger runs, allowing you to apply the actions in the function previous to the query.
+AFTER occurs once the query finishes its work. This allows your trigger to activate once the query it was activated by has finished its work. This will not let you modify the row that is being modified as the process has already finished. This is quite useful for logging purposes, such as inserting into an audit table to track who did a change and when.
+
+CREATE TRIGGER after_trigger
+AFTER UPDATE ON customers
+FOR EACH ROW
+EXECUTE PROCEDURE log_customers_change();
+
+Let’s finally look into that FOR EACH ROW part of our trigger. When using FOR EACH ROW, the trigger will fire and call the function for every row that is impacted by the related query. The other option is to have it set to FOR EACH STATEMENT. FOR EACH STATEMENT calls the function in the trigger once for each query, not for each record.
+
+CREATE TRIGGER each_statement_trigger
+AFTER UPDATE ON customers
+FOR EACH STATEMENT
+EXECUTE PROCEDURE statement_function();
+
+As a note, with the WHEN clause, you can use NEW and OLD to get records from the table before and after the query. Logically, INSERT can not refer to OLD (nothing existed before the insert) and DELETE can not refer to NEW (nothing exists after the delete).
+
+CREATE TRIGGER insert_trigger_high
+BEFORE INSERT ON clients
+FOR EACH ROW
+WHEN (NEW.total_spent >= 1000)
+EXECUTE PROCEDURE high_spender();
+
+CREATE TRIGGER insert_trigger_low
+BEFORE INSERT ON clients
+FOR EACH ROW
+WHEN (NEW.total_spent < 1000)
+EXECUTE PROCEDURE not_a_high_spender();
+
+CREATE TRIGGER update_trigger_low
+BEFORE UPDATE on clients
+FOR EACH ROW
+WHEN (NEW.total_spent < 1000) EXECUTE PROCEDURE set_low_spender();
+
+CREATE TRIGGER update_trigger_high
+BEFORE UPDATE on clients
+FOR EACH ROW
+WHEN (NEW.total_spent >= 1000) EXECUTE PROCEDURE set_high_spender();
+
+In PostgreSQL, multiple triggers of the same kind can exist on the same table. If a statement causes multiple triggers to fire, they are triggered in alphabetical order.
+
+Another point to be aware of is that in PostgreSQL, since SELECT statements do not modify rows, no trigger can be set on a SELECT statement.
+
+Just like everything else in your database, triggers need to be maintained, and sometimes that means pruning obsolete triggers. You can use DROP TRIGGER to accomplish this.
+DROP TRIGGER <trigger_name> ON <table_name>;
+
+In addition to dropping triggers, it can be useful to know what triggers exist. To find that, you just need to look at the information_schema.triggers table.
+SELECT * FROM information_schema.triggers;
+
+SELECT * FROM information_schema.triggers;
+DROP TRIGGER im_a_bad_trigger ON orders;
+SELECT * FROM information_schema.triggers;
+
+Triggers are associated with a specific table, view or foreign table.
+Triggers execute a specified function when certain operations are performed on the table (INSERT, UPDATE, DELETE, TRUNCATE).
+Triggers can run before, after or instead of the operation attempts to alter the row.
+A trigger set FOR EACH ROW is called once for every row modified.
+FOR EACH STATEMENT executes once for the entire operation (0 modified rows would still trigger this).
+Triggers can specify a boolean WHEN condition to see when they should be fired.
+Multiple triggers of the same kind can exist on the same table. If so they are triggered in alphabetical order.
+SELECT statements do not modify rows so no trigger can be set on a SELECT statement.
+One SQL command can trigger more than one kind of trigger.
+Use the DROP TRIGGER command to remove a trigger.
+You can query the information_schema.triggers table to get a list of triggers in the system.
