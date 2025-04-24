@@ -1,0 +1,114 @@
+Luckily for us, PostgreSQL offers methods to safeguard a database and maintain data integrity. One of these methods is called constraints. Constraints are rules defined as part of the data model to control what values are allowed in specific columns and tables.
+
+Specifically, constraints:
+Reject inserts or updates containing values that shouldn’t be inserted into a database table, which can help with preserving data integrity and quality.
+Raise an error when they’re violated, which can help with debugging applications that write to the DB.
+
+In a CREATE TABLE statement we specify the data type for each column of a table (e.g., int, text, timestamp, etc.). In doing so, we’re telling PostgreSQL which types of values can be inserted into each column in the table. 
+
+Name	Description
+boolean	true/false
+varchar or varchar(n)	text with variable length, up to n characters (if specified)
+date	calendar date
+integer	whole number value between -2147483648 and +2147483647
+numeric(a, b)	decimal with total digits (a) and digits after the decimal point (b)
+time	time of day (no time zone)
+
+CREATE TABLE attendees (
+  id integer,
+  name varchar,
+  total_tickets_reserved integer,
+  standard_tickets_reserved integer,
+  vip_tickets_reserved integer
+);
+INSERT INTO attendees (id, name, total_tickets_reserved, standard_tickets_reserved, vip_tickets_reserved)
+VALUES (1, 'John Smith', 2, 1, 1);
+
+In some cases, we might enter data into our database without including a value for every column in each row. For example, this could happen when aggregating data from multiple sources that don’t have the same input columns.
+Missing (NULL) values in certain columns might make our data much less useful.
+With PostgreSQL, we can choose to reject inserts and updates that don’t include data for specific columns by adding a NOT NULL constraint on those columns. With this constraint in place, PostgreSQL will reject the insert statement that contains incomplete data. PostgreSQL will raise an error alerting us that these rows violate the constraint and that our insert or update couldn’t be completed.
+
+CREATE TABLE talks (
+    id integer,
+    title varchar NOT NULL,
+    speaker_id integer NOT NULL,
+    estimated_length integer,
+    session_timeslot timestamp NOT NULL
+);
+
+CREATE TABLE speakers (
+  id integer NOT NULL,
+  email varchar NOT NULL,
+  name varchar NOT NULL,
+  organization varchar, 
+  title varchar,
+  years_in_role integer
+);
+
+In PostgreSQL, we can use ALTER TABLE statements to add or remove constraints from existing tables.
+We can add a NOT NULL constraint to a column using an ALTER TABLE statement: ALTER TABLE talks ALTER COLUMN session_timeslot SET NOT NULL;
+If we later decide we no longer need this constraint, we can drop a NOT NULL constraint from an existing table with the following statement: ALTER TABLE talks ALTER COLUMN session_timeslot DROP NOT NULL
+
+If NULL values are already present in column, we cannot add NOT NULL constraint to that column.
+That time, we can update NULL values and then add constraint to that column:
+UPDATE table_name SET title = 'to be deleted' WHERE title IS NULL;
+
+ALTER TABLE speakers ALTER COLUMN name SET NOT NULL;
+UPDATE speakers
+SET organization = 'tbd'
+WHERE organization IS NULL;
+ALTER TABLE speakers ALTER COLUMN organization SET NOT NULL;
+
+We can use CHECK statements to implement more precise constraints on our table. A CHECK constraint can be written into a CREATE TABLE statement, or added to an existing table with ALTER TABLE.
+To use a check constraint, we list CHECK (...) following the data type in a CREATE TABLE statement and write the condition we’d like to test for inside the parentheses.
+The condition tested for inside of parentheses of a CHECK statement must be a SQL statement that can be evaluated as either true or false. These statements are similar to the statements you may be familiar with in WHERE clauses when filtering rows from a table.
+
+ALTER TABLE speakers ADD CHECK (years_in_role < 100);
+
+Inside a CHECK statement we can use a wide array of SQL syntax to create our conditions. For example, within our check constraint we can:
+Make comparisons between columns within the table
+Use logical operators like AND and OR
+Use other SQL operators you may be familiar with (IN, LIKE)
+
+ALTER TABLE speakers ADD CHECK (years_in_role > 0 AND years_in_role < 100);
+ALTER TABLE attendees ADD CHECK (standard_tickets_reserved + vip_tickets_reserved = total_tickets_reserved);
+
+We can add the constraint to an existing table using the following:
+ALTER TABLE attendees ADD UNIQUE (email);
+
+Just as with single column unique constraints, we can also and add the constraint with an ALTER TABLE statement:
+ALTER TABLE talks ADD UNIQUE (speaker_id, session_timeslot);
+
+ALTER TABLE speakers ADD UNIQUE (email);
+CREATE TABLE registrations (
+    id integer NOT NULL,
+    attendee_id integer NOT NULL,
+    session_timeslot timestamp NOT NULL,
+    talk_id integer NOT NULL,
+    UNIQUE (attendee_id, session_timeslot)
+);
+
+A primary key is a column (or set of columns) that uniquely identifies a row within a database table. A table can only have one primary key, and in order to be selected as a primary key a column (or set of columns) should:
+Uniquely identify that row in the table (like a UNIQUE constraint)
+Contain no null values (like a NOT NULL constraint)
+
+ALTER TABLE speakers
+ADD PRIMARY KEY (id);
+
+Formally, this property that ensures data can be validated by referencing another table in the data model is called referential integrity. Referential integrity can be enforced by adding a FOREIGN KEY on the child table that references the primary key of a parent table.
+If the parent table doesn’t contain the data a user is attempting to insert, PostgreSQL will reject the insert or update and throw an error.
+
+ALTER TABLE registrations ADD FOREIGN KEY (talk_id) REFERENCES talks (id);
+ALTER TABLE talks ADD FOREIGN KEY (speaker_id) REFERENCES speakers (id);
+
+In the previous lesson we discussed how foreign keys enforce referential integrity by preventing updates or deletes on the parent table until the child table is updated first. An engineer can specify the strategy PostgreSQL will use to maintain referential integrity as they define their foreign key constraint.
+Another strategy you may consider is adding a CASCADE clause. Rather than preventing changes, CASCADE clauses (ON UPDATE CASCADE, ON DELETE CASCADE) cause the updates or deletes to automatically be applied to any child tables.
+
+ALTER TABLE registrations
+ADD FOREIGN KEY (talk_id)
+REFERENCES talks (id) ON DELETE CASCADE;
+
+ALTER TABLE talks ADD FOREIGN KEY (speaker_id) REFERENCES speakers (id) ON DELETE CASCADE;
+SELECT * FROM talks;
+DELETE FROM speakers WHERE id = 2;
+SELECT * FROM talks;
