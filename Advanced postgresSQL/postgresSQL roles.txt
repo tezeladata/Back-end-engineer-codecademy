@@ -1,0 +1,75 @@
+The postgres user (or any initial user) has the ability to create new databases, tables, users, etc. In PostgreSQL, the term for a user with these types of permissions is superuser. A superuser bypasses all permission checks that other users face before being allowed to perform an action. In these Codecademy lessons, this user is most often named ccuser.
+
+superuser privileges are not restricted to a single user. In fact, the superuser designation can be passed along to any number of other users in the DB. However, the superuser designation is a dangerous privilege and should be used sparingly. In computing, there is a rule called the principle of least privilege that suggests all applications and users should have only the minimum permissions required for their function.
+
+Select current user code: SELECT current_user;
+
+-- pg_catalog.pg_roles — a listing of all users in the database and a description of what special permissions these users have.
+-- information_schema.table_privileges — description of the permissions a user (grantee) has on a table. This table can be used to answer questions about who can SELECT, INSERT, UPDATE, etc. values on a table.
+
+SELECT grantor, grantee, table_schema, table_name, privilege_type
+FROM information_schema.table_privileges 
+WHERE grantee = 'userB';
+
+The grantor column tells us name of the role that originally granted the privilege. Overall, this output tells us that userB has been given the ability to SELECT and UPDATE on a table named finance.sales by userA.
+
+SELECT * FROM pg_catalog.pg_roles;
+SET ROLE analyst;
+SELECT grantee, table_name, privilege_type FROM information_schema.table_privileges WHERE grantee = 'analyst';
+
+As a superuser, one of the permissions you have is the ability to create new roles. In PostgreSQL, roles can either be login roles or group roles. Login roles are used for most routine database activity. Group roles typically do not have the ability to login themselves, but can hold other roles as “members” and allow access to certain shared permissions.
+
+The CREATE ROLE statement takes a series of arguments that modify the specific parameters around the newly-created user’s permissions. You can create a new login role using CREATE ROLE <name> WITH <list of permissions>;
+CREATE ROLE sampleusr WITH NOSUPERUSER LOGIN;
+
+Just like tables or schemas, roles can be altered. As a superuser, you can use the same syntax as CREATE ROLE to ALTER an existing role. The following statement alters a role, miriam, and gives them the ability to create new databases with CREATEDB.
+ALTER ROLE miriam WITH CREATEDB;
+
+CREATE ROLE analyst WITH NOSUPERUSER LOGIN;
+CREATE ROLE analyst_mgmt WITH LOGIN CREATEROLE NOSUPERUSER;
+ALTER ROLE analyst_mgmt WITH CREATEDB;
+-- Checking analyst_mgmt permissions
+SET ROLE analyst_mgmt;
+CREATE ROLE wilson WITH LOGIN;
+SELECT * FROM pg_catalog.pg_roles 
+ORDER BY rolname;
+
+As a superuser or table or schema owner, you may use GRANT and REVOKE statements to modify the permissions at the schema and table level.
+To use a schema, a role must have a permission called USAGE. Without USAGE a role cannot access tables within that schema. Other schema level permissions include CREATE and DROP, which allow the grantee the ability to create or remove tables in that schema respectively.
+To interact with a table, a role must have USAGE on the table’s schema. Additionally, a table owner must also grant SELECT, UPDATE, DELETE, INSERT etc. on a specific table to define how that role can interact with the table.
+
+In this example, analyst is also granted the ability to CREATE new tables in the schema.
+GRANT USAGE, CREATE ON SCHEMA finance TO analyst;
+Then by granting the table specific permissions.
+GRANT SELECT, UPDATE ON finance.revenue TO analyst;
+
+Any GRANT statement can be reversed using quite similar syntax. First replacing GRANT with REVOKE and TO to FROM. For example, to revoke the ability to UPDATE given above, the owner of the table could use the following statement:
+REVOKE UPDATE ON finance.revenue FROM analyst;
+
+GRANT CREATE, USAGE ON SCHEMA marketing TO analyst;
+GRANT SELECT, INSERT, DELETE ON marketing.prospects TO analyst;
+REVOKE DELETE ON marketing.prospects FROM analyst;
+SET ROLE analyst;
+DELETE FROM marketing.prospects WHERE id = 2;
+
+GRANT USAGE ON finance TO analyst;
+GRANT SELECT ON ALL TABLES IN finance TO analyst;
+This ensures to give analyst select permissions, in every table, even in future created tables
+
+The following statement would allow analyst to SELECT on all newly-created tables in finance immediately after another user has created them
+ALTER DEFAULT PRIVILEGES IN SCHEMA finance GRANT SELECT ON TABLES TO analyst;
+
+GRANT SELECT, DELETE, UPDATE, INSERT ON census.economic_survey TO writer;
+ALTER DEFAULT PRIVILEGES IN SCHEMA census GRANT SELECT, DELETE, UPDATE, INSERT ON TABLES TO writer;
+CREATE TABLE census.housing_survey (
+    area_id int primary key, 
+    median_rent int
+);
+SELECT
+    grantee, 
+    table_schema,
+    table_name,
+    privilege_type
+FROM information_schema.table_privileges 
+WHERE table_schema  = 'census'
+AND grantee = 'writer';
