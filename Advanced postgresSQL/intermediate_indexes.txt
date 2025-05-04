@@ -1,0 +1,19 @@
+Creating partial index:
+CREATE INDEX users_user_name_internal_idx ON users (user_name) WHERE email_address LIKE '%@wellsfargo.com';
+CREATE INDEX customers_years_old_teen_idx ON customers (years_old) WHERE years_old >= 13 AND years_old <= 19;
+
+To specify the order of an index, you can add on the order you want your index sorted in when you create the index. 
+CREATE INDEX logins_date_time_idx ON logins (date_time DESC, user_name);
+
+CREATE INDEX customers_state_name_email_address_idx ON customers (state_name, email_address);
+EXPLAIN ANALYZE SELECT state_name, email_address FROM customers WHERE state_name = 'California' OR state_name = 'Ohio'
+ORDER BY state_name DESC, email_address;
+
+Index for ordering: CREATE INDEX customers_state_name_email_address_ordered_idx ON customers (state_name DESC, email_address ASC);
+
+When creating primary key, index for it will be automatically generated.
+
+When a clustered index is created for a table, the data is physically organized in the table structure to allow for improved search times. You can think of the clustered index like searching a dictionary. In a dictionary, the data (words) and all their related information (definition) are physically ordered by their index (words sorted alphabetically).
+
+You can create many indexes on a table, but only one can be a clustered index, so what about the rest? They are known as non-clustered indexes. Non-clustered indexes have records of the columns they are indexing and a pointer back to the actual data in the table. If you are searching for just the records in the non-clustered index, the system will simply seek for your query results and return them.
+
