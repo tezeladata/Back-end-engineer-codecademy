@@ -1,0 +1,33 @@
+When columns of a database table do not depend on (i.e., describe) the primary key, the same data may be duplicated in multiple places. For example, all students who share an advisor will have the same information listed in these four advisor-related columns.
+
+UPDATE college
+SET advisor_email = 'sophie@college.edu'
+WHERE advisor_name = 'Sommer' AND advisor_department = 'Statistics';
+-- making sure to update only one person, because two advisors could have same advisor_name, but department is different
+
+To create a new table from an existing one, we can precede any query with CREATE TABLE new_table_name AS. To create a new table from an existing one, we can precede any query with CREATE TABLE new_table_name AS. 
+Example:
+CREATE TABLE advisors AS
+SELECT distinct advisor_email, advisor_name, advisor_department FROM college;
+ALTER TABLE college DROP COLUMN advisor_name, DROP COLUMN advisor_department;
+SELECT * FROM advisors WHERE advisor_name = 'Brunson';
+
+Another example:
+CREATE TABLE majors AS
+SELECT distinct major_1, major_1_credits_reqd FROM college;
+
+CREATE TABLE students_majors AS
+SELECT major_1 as major, student_id 
+FROM college
+UNION ALL
+SELECT major_2 as major, student_id
+FROM college
+WHERE major_2 IS NOT NULL;
+
+ALTER TABLE college
+DROP COLUMN major_1,
+DROP COLUMN major_1_credits_reqd,
+DROP COLUMN major_2,
+DROP COLUMN major_2_credits_reqd;
+
+SELECT * FROM students_majors ORDER BY student_id LIMIT 10;
