@@ -1,0 +1,48 @@
+In order to manage database disk utilization, you should first be able to measure disk utilization. As a database user, you can use the following functions to check the size of a relation in a database.
+pg_total_relation_size will return the size of the table and all its indexes in bytes. These values are often in the millions or billions and thus hard to read.
+pg_table_size and pg_indexes_size return the size of the table’s data and table’s indexes in bytes. The sum of these two functions is equal to pg_total_relation_size
+pg_size_pretty can be used with the functions above to format a number in bytes as KB, MB, or GB.
+
+SELECT 
+    pg_size_pretty(pg_table_size('time_series')) as tbl_size, 
+    pg_size_pretty(pg_indexes_size('time_series')) as idx_size,
+    pg_size_pretty(pg_total_relation_size('time_series')) as total_size;
+
+Another example:
+SELECT pg_size_pretty(pg_table_size('mock.house_prices')) as total_size;
+SELECT pg_size_pretty(pg_indexes_size('mock.house_prices')) as total_size;
+SELECT pg_size_pretty(pg_total_relation_size('mock.house_prices_pk')) as total_size2;
+SELECT pg_size_pretty(pg_total_relation_size('mock.house_prices')) as total_size3;
+
+Each row in a PostgreSQL table is stored in a file on the disk of the host machine. When an UPDATE or DELETE is called, PostgreSQL doesn’t physically delete the content from the disk. Instead, the database engine marks those rows so that they aren’t returned in user queries. These rows are called dead tuples, and although they aren’t referenced in the current version of databases’ tables, they still occupy space on disk and can affect performance.
+
+There are also statements you can use that allow you to actively manage disk usage. In PostgreSQL there is an operation called VACUUM that can be used to manage storage space. Running VACUUM <table name>; will vacuum a specific table, while a VACUUM statement without a table name will run on the entire database.
+UPDATE mock.stock_prices SET price_sh = price_sh + 10 WHERE trading_date > '2020-01-1'::date;
+VACUUM mock.stock_prices;
+SELECT pg_size_pretty(pg_total_relation_size('mock.stock_prices')) as total_size;
+
+One nice property about VACUUM is that it allows space to be reused. If tables are vacuumed frequently enough, the disk usage of a table will stay relatively steady because updates will never get “too far ahead” of the required space on the disk. 
+
+When using autovacuum, PostgreSQL periodically checks for tables that have had a large number of inserted, updated or deleted tuples that could be vacuumed to improve performance. When autovacuum is enabled and finds such a table, a VACUUM ANALYZE command is run.
+
+The following query could be used to check statistics for a table named books
+SELECT relname, last_vacuum,last_autovacuum, last_analyze
+FROM pg_stat_all_tables 
+WHERE relname = 'books';
+
+The behavior for DELETE operations is slightly different. Unlike updates, deletes don’t add space to a table. However, a DELETE statement will create dead tuples and leave the size of the table unchanged.
+
+The size of a table alone doesn’t give us all the information we need about maintenance status. We can query pg_stat_all_tables to help us understand the status of tuples in a table. Specifically, we can use the columns n_dead_tup, and n_live_tup from this table to assess the status of the table.
+SELECT schemaname, relname, n_dead_tup, n_live_tup
+FROM pg_stat_all_tables LIMIT 3
+
+DELETE FROM mock.stock_prices WHERE day_id = 5 OR day_id = 6;
+SELECT pg_size_pretty(pg_total_relation_size('mock.stock_prices')) as total_size;
+ANALYZE mock.stock_prices;
+SELECT schemaname, relname, n_dead_tup, n_live_tup FROM pg_stat_all_tables WHERE relname = 'mock.stock_prices';
+
+There is an alternative VACUUM method, VACUUM FULL which rewrites all the data from a table into a “new” location on disk and only copies the required data (excluding dead tuples). This allows PostgreSQL to fully clear the space the table occupied. One of the significant drawbacks from VACUUM FULL is that it’s a slow operation that blocks other operations on the table while it’s working. If you’ve got a large table, this could mean a VACUUM FULL operation might block other user’s or application’s queries. In a local setting, this may seem trivial, but for production databases, preventing reads and writes on a table for even a few seconds can have lasting effects.
+
+select relname, n_live_tup, n_dead_tup , last_vacuum
+from pg_catalog.pg_stat_all_tables
+where relname = 'orders';
